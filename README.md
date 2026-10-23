@@ -7,8 +7,6 @@
 - **Full Web Portal & REST API:** มาพร้อมเว็บแอปพลิเคชัน UI ที่ทันสมัย และ REST API สำหรับเชื่อมต่อระบบภายนอก
 - **Multi-platform Deployment:** รองรับทั้งรันบน Windows Native และ Linux Docker (Rust Native Engine Zero-Windows Dependency)
 
-📖 เบื้องหลังการค้นพบอ่านได้ที่ [DISCOVERY.md](DISCOVERY.md)
-
 ---
 
 ## ภาพตัวอย่างการใช้งานระบบ (System Screenshots)
@@ -34,6 +32,7 @@
 - [6. ที่มาของไฟล์](#6-ที่มาของไฟล์)
 - [7. คู่มือการติดตั้งบน Ubuntu Server (Deployment Guide)](#7-คู่มือการติดตั้งบน-ubuntu-server-deployment-guide)
 - [8. สถาปัตยกรรม Rust Native บน Linux Docker (แนะนำสูงสุด)](#8-สถาปัตยกรรม-rust-native-บน-linux-docker-แนะนำสูงสุด---zero-windows-dependency)
+- [Special Thanks](#special-thanks)
 
 ---
 
@@ -218,3 +217,12 @@ print("มุมเอียงของข้อความ:", result["text_an
   ```bash
   docker compose up -d
   ```
+
+---
+
+## Special Thanks
+
+ขอขอบคุณผู้มีส่วนร่วมและร่วมแลกเปลี่ยนความรู้ในการพัฒนา:
+- [Panupong Kongkate (@panupongkongkate)](https://github.com/panupongkongkate)
+- [Bropines (@bropines)](https://github.com/bropines)
+
