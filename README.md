@@ -223,6 +223,7 @@ print("มุมเอียงของข้อความ:", result["text_an
 ## Special Thanks
 
 ขอขอบคุณผู้มีส่วนร่วมและร่วมแลกเปลี่ยนความรู้ในการพัฒนา:
+- [AuroraWright (@AuroraWright)](https://github.com/AuroraWright)
 - [Panupong Kongkate (@panupongkongkate)](https://github.com/panupongkongkate)
 - [Bropines (@bropines)](https://github.com/bropines)
 
