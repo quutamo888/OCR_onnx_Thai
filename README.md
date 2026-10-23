@@ -1,4 +1,4 @@
-# ThaiOCR ONNX: อ่านภาษาไทยจากรูปและ PDF เป็น Markdown บน CPU (Offline 100%)
+# OCR_onnx_Thai: อ่านภาษาไทยจากรูปและ PDF เป็น Markdown บน CPU (Offline 100%)
 
 ระบบ OCR ภาษาไทย (และอีกหลายภาษา) ด้วย **OneOCR** เอนจินเดียวกับ Snipping Tool Text Extractor ใน Windows 11
 - **CPU ล้วน ~0.17 วิ/รูป** ไม่ต้องต่อเน็ต ไม่ต้อง GPU/NPU ไม่ต้องสิทธิ์ Admin โมเดลและเอนจินแนบมาใน Repo ครบ
