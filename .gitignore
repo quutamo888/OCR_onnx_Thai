@@ -1,0 +1,11 @@
+__pycache__/
+*.pyc
+data/
+output/
+target/
+rust_worker/target/
+frontend/node_modules/
+.env
+certs/
+*.key
+*.crt

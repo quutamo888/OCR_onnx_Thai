@@ -1,0 +1,118 @@
+services:
+  # Garage S3-compatible Object Storage
+  garage:
+    image: dxflrs/garage:v1.1.0
+    container_name: thai-ocr-garage
+    restart: unless-stopped
+    expose:
+      - "3900" # S3 API (Internal only)
+      - "3902" # Web / S3 Web (Internal only)
+      - "3903" # Admin API (Internal only)
+    volumes:
+      - ./garage.toml:/etc/garage.toml:ro
+      - ./data/garage/meta:/var/lib/garage/meta
+      - ./data/garage/data:/var/lib/garage/data
+    environment:
+      - RUST_LOG=info
+    healthcheck:
+      test: ["CMD", "/garage", "status"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 5s
+
+  # ThaiOCR High-Performance Rust OCR Engine Service (Auto-scalable: 1..N)
+  rust-ocr-worker:
+    build:
+      context: .
+      dockerfile: rust_worker/Dockerfile
+    restart: unless-stopped
+    expose:
+      - "8001"
+    volumes:
+      - ./models:/app/models:ro
+    environment:
+      - PORT=8001
+      - MODELS_DIR=/app/models
+
+  # Nginx Reverse Proxy Gateway (TLS 1.3 HTTPS)
+  thai-ocr-gateway:
+    image: nginx:alpine
+    container_name: thai-ocr-gateway
+    restart: unless-stopped
+    ports:
+      - "8843:443"   # HTTPS เข้าใช้งานที่ https://localhost:8843
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./certs:/etc/nginx/certs:ro
+    depends_on:
+      - rust-ocr-worker
+      - thai-ocr-app
+
+  # High-Speed In-Memory OCR Cache (Deduplication & Instant Response)
+  redis:
+    image: redis:7-alpine
+    container_name: thai-ocr-redis
+    restart: unless-stopped
+    command: redis-server --appendonly no --maxmemory 512mb --maxmemory-policy allkeys-lru
+    expose:
+      - "6379"
+    volumes:
+      - ./data/redis:/data
+
+  # ThaiOCR Web Application (Portal + API)
+  thai-ocr-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: thai-ocr-web
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    pids_limit: 200
+    expose:
+      - "8000" # Internal only, accessed via Nginx Gateway
+    depends_on:
+      - garage
+      - redis
+    environment:
+      - PORT=8000
+      - ENABLE_API_DOCS=false
+      - OCR_WORKER_URL=http://thai-ocr-gateway:8001
+      - REDIS_URL=redis://redis:6379/0
+      - ENABLE_OCR_CACHE=true
+      - S3_ENDPOINT_URL=http://garage:3900
+      - S3_ACCESS_KEY=${S3_ACCESS_KEY:-GK436e3a93075c0957462a5d81}
+      - S3_SECRET_KEY=${S3_SECRET_KEY:-3ec66c478ead94804f1e10edf7625a4b119391d95f093df77a3d5a9147be98cd}
+      - S3_BUCKET_NAME=ocr-documents
+      - S3_REGION=garage
+      - USE_LOCAL_FALLBACK=true
+      - ADMIN_USER=${ADMIN_USER:-admin}
+      - ADMIN_PASSWORD=${ADMIN_PASSWORD:-Admin@Ocr2026!}
+      - APP_SECRET_KEY=${APP_SECRET_KEY:-thai-ocr-default-secret-key-2026}
+    volumes:
+      - ./data:/app/data
+      - ./output:/app/output
+
+  # ThaiOCR Dynamic Auto-Scaler Sidecar
+  ocr-autoscaler:
+    build:
+      context: ./autoscaler
+      dockerfile: Dockerfile
+    container_name: thai-ocr-autoscaler
+    restart: unless-stopped
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./:/workspace:ro
+      - ./data:/app/data:ro
+    environment:
+      - MIN_WORKERS=1
+      - MAX_WORKERS=6
+      - IDLE_COOLDOWN_SEC=60
+      - CHECK_INTERVAL_SEC=3
+      - COMPOSE_FILE=/workspace/docker-compose.yml
+      - DB_PATH=/app/data/ocr_engine.db
+      - SERVICE_NAME=rust-ocr-worker
+    depends_on:
+      - thai-ocr-gateway
+      - thai-ocr-app

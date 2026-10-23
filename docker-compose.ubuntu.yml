@@ -1,0 +1,70 @@
+services:
+  # 1. Windows Virtualized Container สำหรับรัน OCR Worker (KVM/QEMU)
+  windows-ocr-worker:
+    image: dockurr/windows:latest
+    container_name: thai-windows-worker
+    environment:
+      VERSION: "10l" # Windows 10 Enterprise LTSC (โหลดตรงจาก Microsoft CDN เร็วเต็มสปีด และเบาไม่มี Bloatware)
+      RAM_SIZE: "6G"
+      CPU_CORES: "4"
+      DISK_SIZE: "25G" # ปรับให้พอดีกับพื้นที่ว่างบนไดรฟ์ (Win10 LTSC ใช้จริง ~12GB)
+    devices:
+      - /dev/kvm
+      - /dev/net/tun
+    cap_add:
+      - NET_ADMIN
+    ports:
+      - "8001:8001" # OCR Worker REST API (Forwarded to Windows VM)
+      - "8006:8006" # Web VNC สำหรับเข้าดูหน้าจอ Windows ผ่าน Browser
+    volumes:
+      - ./data/windows:/storage # เก็บ Persistent Virtual Disk ไม่ต้องติดตั้งใหม่เมื่อรีสตาร์ต
+      - ./:/shared              # Mount โปรเจกต์เข้าไดรฟ์ Z: ใน Windows
+      - ./oem:/oem              # รัน C:\OEM\install.bat อัตโนมัติใน First Logon
+    restart: unless-stopped
+    stop_grace_period: 2m
+
+  # 2. Garage S3 Object Storage (Linux Native)
+  garage:
+    image: dxflrs/garage:v1.1.0
+    container_name: thai-ocr-garage
+    restart: unless-stopped
+    ports:
+      - "3900:3900"
+    volumes:
+      - ./garage.toml:/etc/garage.toml:ro
+      - ./data/garage/meta:/var/lib/garage/meta
+      - ./data/garage/data:/var/lib/garage/data
+    environment:
+      - RUST_LOG=info
+
+  # 3. ThaiOCR Web Application (Linux Container)
+  thai-ocr-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: thai-ocr-web
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    pids_limit: 200
+    ports:
+      - "8000:8000"
+    depends_on:
+      - garage
+      - windows-ocr-worker
+    environment:
+      - PORT=8000
+      - ENABLE_API_DOCS=false
+      - OCR_WORKER_URL=http://windows-ocr-worker:8001
+      - S3_ENDPOINT_URL=http://garage:3900
+      - S3_ACCESS_KEY=GK436e3a93075c0957462a5d81
+      - S3_SECRET_KEY=3ec66c478ead94804f1e10edf7625a4b119391d95f093df77a3d5a9147be98cd
+      - S3_BUCKET_NAME=ocr-documents
+      - S3_REGION=garage
+      - USE_LOCAL_FALLBACK=true
+      - ADMIN_USER=${ADMIN_USER:-admin}
+      - ADMIN_PASSWORD=${ADMIN_PASSWORD:-Admin@Ocr2026!}
+      - APP_SECRET_KEY=${APP_SECRET_KEY:-thai-ocr-default-secret-key-2026}
+    volumes:
+      - ./data:/app/data
+      - ./output:/app/output
