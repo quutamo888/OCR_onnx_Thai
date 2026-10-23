@@ -29,8 +29,7 @@
 - [3. เรียกใช้จากโค้ด Python ตัวเอง](#3-เรียกใช้จากโค้ด-python-ตัวเอง)
 - [4. คุณสมบัติและความปลอดภัย (Offline 100%)](#4-คุณสมบัติและความปลอดภัย-offline-100)
 - [5. ตัวเลขประสิทธิภาพการทำงาน](#5-ตัวเลขประสิทธิภาพการทำงาน)
-- [6. คู่มือการติดตั้งบน Ubuntu Server (Deployment Guide)](#6-คู่มือการติดตั้งบน-ubuntu-server-deployment-guide)
-- [7. สถาปัตยกรรม Rust Native บน Linux Docker (แนะนำสูงสุด)](#7-สถาปัตยกรรม-rust-native-บน-linux-docker-แนะนำสูงสุด---zero-windows-dependency)
+- [6. ติดตั้งและเริ่มใช้งานด้วย Docker (Linux / Ubuntu / Windows)](#6-ติดตั้งและเริ่มใช้งานด้วย-docker-linux--ubuntu--windows)
 - [Special Thanks](#special-thanks)
 
 ---
@@ -147,66 +146,24 @@ print("มุมเอียงของข้อความ:", result["text_an
 
 ---
 
-## 6. คู่มือการติดตั้งบน Ubuntu Server (Deployment Guide)
+## 6. ติดตั้งและเริ่มใช้งานด้วย Docker (Linux / Ubuntu / Windows)
 
-เนื่องจาก `oneocr.dll` เป็น PE32+ DLL สำหรับ Windows x64 โดยเฉพาะ หากต้องการนำระบบไปให้บริการบนเครื่องเซิร์ฟเวอร์ Linux / Ubuntu ให้ใช้รูปแบบใดรูปแบบหนึ่งดังนี้:
+ระบบพัฒนาด้วยสถาปัตยกรรม Native Linux Engine รันบน Docker ได้โดยตรง โดยไม่ต้องพึ่งพา Windows หรือ Windows VM อีกต่อไป:
+- **Core Engine:** พัฒนาด้วยภาษา **Rust** คอมไพล์เป็น Linux 64-bit Native Binary (`thai_rust_ocr`) รันโมเดลโครงข่ายประสาทเทียม OneOCR ONNX โดยตรงผ่าน ONNX Runtime C API
+- **Dynamic Autoscaling:** ปรับลด-เพิ่ม Worker ตามโหลดจริงอัตโนมัติ (1 ถึง 6 Instances)
+- **High-Performance Caching:** มี Redis In-Memory LRU Cache จดจำแฮชไฟล์เอกสาร คืนค่าผลลัพธ์ทันทีใน 40-50ms
+- **TLS 1.3 Security Gateway:** Nginx Reverse Proxy พร้อมระบบรักษาความปลอดภัยในการเชื่อมต่อ
+- **Full Web Portal & REST API:** พร้อมหน้ากากเว็บสำหรับผู้ใช้ทั่วไป และ API สำหรับระบบภายนอก
 
-### แนวทางที่ 1: Hybrid Architecture (แนะนำสำหรับ Production ใช้งาน Windows Worker)
-แยก Web Application และ OCR Worker ออกจากกัน:
-- **Ubuntu Server (Host หลัก):** รัน `docker-compose.yml` (Web Portal + Garage S3 + SQLite)
-- **Windows Server VM (Worker):** รันบน Hyper-V / VMware / Proxmox รัน `python ocr_worker.py` (Port 8001)
-- **การตั้งค่า Environment ใน `docker-compose.yml` ฝั่ง Ubuntu:**
-  ```yaml
-  environment:
-    - OCR_WORKER_URL=http://<IP-WINDOWS-VM>:8001
-  ```
+### คำสั่งเริ่มต้นระบบ:
+```bash
+docker compose up -d
+```
 
----
-
-### แนวทางที่ 2: All-in-One บน Ubuntu ด้วย KVM/QEMU Windows Container (`dockur/windows`)
-รันทุกอย่างบน Ubuntu Server เครื่องเดียว โดยใช้ KVM Virtualization รัน Windows Container:
-
-1. **เตรียมสภาพแวดล้อมด้วยสคริปต์อัตโนมัติ:**
-   ```bash
-   chmod +x setup-ubuntu.sh
-   ./setup-ubuntu.sh
-   ```
-
-2. **การทำงานของระบบอัตโนมัติ (Automated OEM Provisioning):**
-   - เมื่อรัน `docker compose -f docker-compose.ubuntu.yml up -d`
-   - คอนเทนเนอร์ `windows-ocr-worker` จะดึงอิมเมจ `dockurr/windows` มารันด้วย KVM
-   - ระบบจะแมปไดรฟ์โค้ดเข้าไปที่ `Z:\` และโฟลเดอร์ `oem/` เข้าไปที่ `C:\OEM\`
-   - Windows จะรันสคริปต์ `install.bat` เพื่อตั้งค่า Firewall และรัน `run_ocr_worker.bat` อัตโนมัติ
-   - เมื่อ Windows บูตเสร็จ OCR Worker พอร์ต 8001 จะเปิดให้บริการทันที และ `thai-ocr-app` จะเชื่อมต่อผ่านเครือข่าย Docker ภายในอัตโนมัติ
-
-3. **คำสั่งสั่งงานและตรวจสอบ:**
-   ```bash
-   # เริ่มต้นทุกบริการ
-   docker compose -f docker-compose.ubuntu.yml up -d
-
-   # ตรวจสอบหน้าจอติดตั้ง Windows ครั้งแรกผ่านเบราว์เซอร์
-   http://<IP-Ubuntu>:8006 (Web VNC)
-
-   # ตรวจสอบสถานะ OCR Worker
-   curl http://localhost:8001/health
-
-   # ใช้งาน Web Portal ThaiOCR
-   https://<IP-Ubuntu>:8843
-   ```
-
----
-
-## 7. สถาปัตยกรรม Rust Native บน Linux Docker (แนะนำสูงสุด - Zero Windows Dependency)
-
-ระบบมีสถาปัตยกรรมแบบ Native Linux โดยปลดแอกการพึ่งพา Windows Host โดยสิ้นเชิง:
-- **Core Engine:** ใช้ภาษา **Rust** คอมไพล์เป็น Linux 64-bit Native Binary (`thai_rust_ocr`)
-- **Neural Models:** รันโครงข่ายประสาทเทียม OneOCR ONNX (Microsoft) โดยตรงผ่าน ONNX Runtime C API
-- **Auto-scaling:** มีระบบ Dynamic Worker Autoscaling (`thai-ocr-autoscaler`) ปรับลด-เพิ่ม Worker ตามโหลดจริงอัตโนมัติ (1 ถึง 6 Instances)
-- **High-Performance Caching:** มี Redis LRU Cache จดจำแฮชไฟล์เอกสารเพื่อคืนค่าผลลัพธ์ได้ใน 40-50ms ทันที
-- **คำสั่งเริ่มต้นระบบ (Linux Docker):**
-  ```bash
-  docker compose up -d
-  ```
+### การเข้าใช้งาน:
+- **Web Portal (HTTPS):** `https://localhost:8843` (หรือ `https://<Server-IP>:8843`)
+- **บัญชีผู้ดูแลระบบเริ่มต้น:** ผู้ใช้: `admin` / รหัสผ่าน: `Admin@Ocr2026!`
+- **Health Check API:** `curl -k https://localhost:8843/api/health`
 
 ---
 
