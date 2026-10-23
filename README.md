@@ -29,9 +29,8 @@
 - [3. เรียกใช้จากโค้ด Python ตัวเอง](#3-เรียกใช้จากโค้ด-python-ตัวเอง)
 - [4. คุณสมบัติและความปลอดภัย (Offline 100%)](#4-คุณสมบัติและความปลอดภัย-offline-100)
 - [5. ตัวเลขประสิทธิภาพการทำงาน](#5-ตัวเลขประสิทธิภาพการทำงาน)
-- [6. ที่มาของไฟล์](#6-ที่มาของไฟล์)
-- [7. คู่มือการติดตั้งบน Ubuntu Server (Deployment Guide)](#7-คู่มือการติดตั้งบน-ubuntu-server-deployment-guide)
-- [8. สถาปัตยกรรม Rust Native บน Linux Docker (แนะนำสูงสุด)](#8-สถาปัตยกรรม-rust-native-บน-linux-docker-แนะนำสูงสุด---zero-windows-dependency)
+- [6. คู่มือการติดตั้งบน Ubuntu Server (Deployment Guide)](#6-คู่มือการติดตั้งบน-ubuntu-server-deployment-guide)
+- [7. สถาปัตยกรรม Rust Native บน Linux Docker (แนะนำสูงสุด)](#7-สถาปัตยกรรม-rust-native-บน-linux-docker-แนะนำสูงสุด---zero-windows-dependency)
 - [Special Thanks](#special-thanks)
 
 ---
@@ -148,16 +147,7 @@ print("มุมเอียงของข้อความ:", result["text_an
 
 ---
 
-## 6. ที่มาของไฟล์
-
-- `oneocr/oneocr.py` — wrapper ดั้งเดิมจาก [AuroraWright/oneocr](https://github.com/AuroraWright/oneocr) (ปรับปรุง fallback ให้โหลดไฟล์ dll ใน repo อัตโนมัติ)
-- `oneocr/` (oneocr.dll, oneocr.onemodel, onnxruntime.dll) — binary ของ Microsoft ที่มาพร้อมกับ Windows Snipping Tool (`Microsoft.ScreenSketch`)
-- `pdf_to_md.py` — สคริปต์แปลง PDF เป็น Markdown พร้อม Auto-rotate และ Table Parser
-- ⚠️ เป็น API ภายในของระบบ Windows
-
----
-
-## 7. คู่มือการติดตั้งบน Ubuntu Server (Deployment Guide)
+## 6. คู่มือการติดตั้งบน Ubuntu Server (Deployment Guide)
 
 เนื่องจาก `oneocr.dll` เป็น PE32+ DLL สำหรับ Windows x64 โดยเฉพาะ หากต้องการนำระบบไปให้บริการบนเครื่องเซิร์ฟเวอร์ Linux / Ubuntu ให้ใช้รูปแบบใดรูปแบบหนึ่งดังนี้:
 
@@ -206,7 +196,7 @@ print("มุมเอียงของข้อความ:", result["text_an
 
 ---
 
-## 8. สถาปัตยกรรม Rust Native บน Linux Docker (แนะนำสูงสุด - Zero Windows Dependency)
+## 7. สถาปัตยกรรม Rust Native บน Linux Docker (แนะนำสูงสุด - Zero Windows Dependency)
 
 ระบบมีสถาปัตยกรรมแบบ Native Linux โดยปลดแอกการพึ่งพา Windows Host โดยสิ้นเชิง:
 - **Core Engine:** ใช้ภาษา **Rust** คอมไพล์เป็น Linux 64-bit Native Binary (`thai_rust_ocr`)
