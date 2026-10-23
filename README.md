@@ -173,6 +173,7 @@ docker compose up -d
 
 ขอขอบคุณผู้มีส่วนร่วมและร่วมแลกเปลี่ยนความรู้ในการพัฒนา:
 - [AuroraWright (@AuroraWright)](https://github.com/AuroraWright)
+- [b1tg (@b1tg)](https://github.com/b1tg) — [Win11 OneOCR Research](https://b1tg.github.io/post/win11-oneocr/)
 - [Panupong Kongkate (@panupongkongkate)](https://github.com/panupongkongkate)
 - [Bropines (@bropines)](https://github.com/bropines)
 
