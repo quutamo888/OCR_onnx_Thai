@@ -149,7 +149,7 @@ def process_document_stream(file_bytes: bytes, filename: str, dpi: int = 200):
             info = r.json()
             srv = info.get("service", "").lower()
             eng = info.get("engine", "").lower()
-            if "rust" in srv or "rust" in eng:
+            if "rust" in srv or "rust" in eng or "rust" in worker_url or srv == "thaiocr rust worker":
                 is_rust_worker = True
     except Exception:
         pass

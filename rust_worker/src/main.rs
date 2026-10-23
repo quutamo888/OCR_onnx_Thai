@@ -64,7 +64,9 @@ async fn main() -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
 
 async fn health_handler() -> impl IntoResponse {
     Json(json!({
-        "status": "healthy"
+        "status": "healthy",
+        "service": "ThaiOCR Rust Worker",
+        "engine": "rust"
     }))
 }
 
