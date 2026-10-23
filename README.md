@@ -6,6 +6,7 @@
 - **รองรับทั้งรูปภาพและ PDF:** มีสคริปต์แปลง PDF หลายหน้าเป็น **Markdown (.md)** พร้อมระบบ Auto-rotate และตรวจจับตาราง
 - **Full Web Portal & REST API:** มาพร้อมเว็บแอปพลิเคชัน UI ที่ทันสมัย และ REST API สำหรับเชื่อมต่อระบบภายนอก
 - **Multi-platform Deployment:** รองรับทั้งรันบน Windows Native และ Linux Docker (Rust Native Engine Zero-Windows Dependency)
+- **Machine-to-Machine (M2M) for LLM RAG:** แปลงเอกสารสแกนและตารางเป็น Structured Markdown สำหรับส่งต่อเข้า Vector Database และ LLM RAG Pipeline (อ่านคู่มือได้ที่ [feature.md](feature.md))
 
 ---
 
@@ -30,6 +31,7 @@
 - [4. คุณสมบัติและความปลอดภัย (Offline 100%)](#4-คุณสมบัติและความปลอดภัย-offline-100)
 - [5. ตัวเลขประสิทธิภาพการทำงาน](#5-ตัวเลขประสิทธิภาพการทำงาน)
 - [6. ติดตั้งและเริ่มใช้งานด้วย Docker (Linux / Ubuntu / Windows)](#6-ติดตั้งและเริ่มใช้งานด้วย-docker-linux--ubuntu--windows)
+- [คู่มือ M2M API สำหรับ LLM RAG Pipeline (feature.md)](feature.md)
 - [Special Thanks](#special-thanks)
 
 ---
